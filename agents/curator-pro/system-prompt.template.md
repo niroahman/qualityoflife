@@ -14,6 +14,7 @@ PALAUTUSFORMAATTI (JSON):
   {
     "otsikko": "...",
     "lahde": "...",
+    "lahde_tyyppi": "artikkeli tai podcast",
     "pisteet": 9,
     "perustelu": "Yksi lause suomeksi miksi tämä kannattaa lukea",
     "linkki": "https://...",

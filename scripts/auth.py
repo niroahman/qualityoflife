@@ -8,6 +8,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+_REQUIRED = ["SB_BASE_URL", "CF_ACCESS_CLIENT_ID", "CF_ACCESS_CLIENT_SECRET", "SB_USER", "SB_PASSWORD"]
+for _var in _REQUIRED:
+    if _var not in os.environ:
+        print(f"ERROR: Missing required env var: {_var} (check your .env file)", file=sys.stderr)
+        sys.exit(1)
+
 SB_BASE_URL = os.environ["SB_BASE_URL"].rstrip("/")
 CF_CLIENT_ID = os.environ["CF_ACCESS_CLIENT_ID"]
 CF_CLIENT_SECRET = os.environ["CF_ACCESS_CLIENT_SECRET"]
