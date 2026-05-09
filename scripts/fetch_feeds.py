@@ -7,6 +7,8 @@ import re
 import sys
 from datetime import datetime
 
+import socket
+
 import feedparser
 import yaml
 from dotenv import load_dotenv
@@ -16,6 +18,8 @@ load_dotenv()
 MAX_ITEMS = int(os.getenv("FEED_MAX_ITEMS", 5))
 MAX_DESC = int(os.getenv("FEED_MAX_DESC_CHARS", 400))
 TIMEOUT = int(os.getenv("FEED_TIMEOUT_SECS", 10))
+
+socket.setdefaulttimeout(TIMEOUT)
 
 
 def strip_html(text: str) -> str:
@@ -45,8 +49,6 @@ def fetch_feed(feed_cfg: dict, output) -> None:
     feed_type = feed_cfg.get("type", "feed")
 
     try:
-        import socket
-        socket.setdefaulttimeout(TIMEOUT)
         parsed = feedparser.parse(url, request_headers={"User-Agent": "Mozilla/5.0"})
     except Exception as e:
         print(f"WARNING: [{name}] fetch error: {e}", file=sys.stderr)

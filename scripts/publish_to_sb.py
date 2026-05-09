@@ -89,8 +89,13 @@ def main() -> None:
     parser.add_argument("--input", default=None, help="JSON file (default: stdin)")
     args = parser.parse_args()
 
-    raw = open(args.input).read() if args.input else sys.stdin.read()
+    if args.input:
+        with open(args.input) as f:
+            raw = f.read()
+    else:
+        raw = sys.stdin.read()
 
+    # Gemini sometimes wraps JSON output in markdown code fences — strip them
     raw = raw.strip()
     if raw.startswith("```"):
         raw = "\n".join(raw.split("\n")[1:])
