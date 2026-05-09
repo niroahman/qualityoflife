@@ -25,6 +25,7 @@ def build_markdown(items: list[dict], agent: str) -> str:
     label = "Pro" if agent == "pro" else "Personal"
     generated = now.strftime("%Y-%m-%d %H:%M")
 
+    items = sorted(items, key=lambda i: i.get("pisteet", 0), reverse=True)
     articles = [i for i in items if not is_podcast(i)]
     podcasts = [i for i in items if is_podcast(i)]
 

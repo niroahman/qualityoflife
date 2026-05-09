@@ -5,6 +5,7 @@ AGENT=${1:-"pro"}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 AGENT_DIR="$REPO_DIR/agents/curator-$AGENT"
+STATE_FILE="$REPO_DIR/.state/last-run-$AGENT.txt"
 FEEDS_RAW=$(mktemp /tmp/feeds_raw_XXXXXX.md)
 
 cleanup() {
@@ -26,7 +27,8 @@ echo "⚙️  Haetaan konfiguraatio SilverBulletista..."
 echo "📡 Haetaan syötteet..."
 .venv/bin/python "$SCRIPT_DIR/fetch_feeds.py" \
   --feeds /tmp/runtime-feeds.yaml \
-  --output "$FEEDS_RAW"
+  --output "$FEEDS_RAW" \
+  --since-file "$STATE_FILE"
 
 # 2. FILTER
 echo "🤖 Filtteröidään AI:lla..."
@@ -45,4 +47,6 @@ fi
 echo "📤 Julkaistaan SilverBulletiin..."
 echo "$DIGEST_JSON" | .venv/bin/python "$SCRIPT_DIR/publish_to_sb.py" --agent "$AGENT"
 
+mkdir -p "$(dirname "$STATE_FILE")"
+date -u +"%Y-%m-%dT%H:%M:%S" > "$STATE_FILE"
 echo "✅ curator-$AGENT valmis!"
