@@ -1,4 +1,5 @@
 .env
+PRE_INSTRUCTIONS.md
 __pycache__/
 *.py[cod]
 *.egg-info/

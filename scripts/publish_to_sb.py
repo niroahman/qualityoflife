@@ -1,40 +1,12 @@
 #!/usr/bin/env python3
 """Publish weekly digest to SilverBullet."""
 
+import argparse
 import json
-import os
 import sys
 from datetime import datetime
 
-import requests
-from dotenv import load_dotenv
-
-load_dotenv()
-
-SB_BASE_URL = os.environ["SB_BASE_URL"].rstrip("/")
-CF_CLIENT_ID = os.environ["CF_ACCESS_CLIENT_ID"]
-CF_CLIENT_SECRET = os.environ["CF_ACCESS_CLIENT_SECRET"]
-SB_USER = os.environ["SB_USER"]
-SB_PASSWORD = os.environ["SB_PASSWORD"]
-
-CF_HEADERS = {
-    "CF-Access-Client-Id": CF_CLIENT_ID,
-    "CF-Access-Client-Secret": CF_CLIENT_SECRET,
-}
-
-
-def get_session() -> requests.Session:
-    session = requests.Session()
-    session.headers.update(CF_HEADERS)
-    resp = session.post(
-        f"{SB_BASE_URL}/.auth",
-        data={"username": SB_USER, "password": SB_PASSWORD},
-        timeout=10,
-    )
-    if resp.status_code != 200:
-        print(f"ERROR: SilverBullet auth failed: {resp.status_code}", file=sys.stderr)
-        sys.exit(1)
-    return session
+from auth import SB_BASE_URL, get_session
 
 
 def page_name(agent: str) -> str:
@@ -43,15 +15,18 @@ def page_name(agent: str) -> str:
     return f"Digest/{year}-W{week:02d}-{agent}"
 
 
+def is_podcast(item: dict) -> bool:
+    return item.get("lahde_tyyppi") == "podcast" or bool(item.get("podcast_sivu") or item.get("podcast_mp3"))
+
+
 def build_markdown(items: list[dict], agent: str) -> str:
     now = datetime.now()
     year, week, _ = now.isocalendar()
     label = "Pro" if agent == "pro" else "Personal"
     generated = now.strftime("%Y-%m-%d %H:%M")
 
-    articles = [i for i in items if not i.get("podcast_sivu") and not i.get("podcast_mp3")]
-    podcasts = [i for i in items if i.get("podcast_sivu") or i.get("podcast_mp3")]
-    releases = []  # GitHub releases come in via separate step (future)
+    articles = [i for i in items if not is_podcast(i)]
+    podcasts = [i for i in items if is_podcast(i)]
 
     lines = [
         f"# 📰 Viikkodigest — Viikko {week} / {year} ({label})",
@@ -95,7 +70,7 @@ def build_markdown(items: list[dict], agent: str) -> str:
     return "\n".join(lines)
 
 
-def publish(session: requests.Session, page: str, content: str) -> None:
+def publish(session, page: str, content: str) -> None:
     url = f"{SB_BASE_URL}/.fs/{page}.md"
     resp = session.put(
         url,
@@ -109,19 +84,13 @@ def publish(session: requests.Session, page: str, content: str) -> None:
 
 
 def main() -> None:
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--agent", required=True)
     parser.add_argument("--input", default=None, help="JSON file (default: stdin)")
     args = parser.parse_args()
 
-    if args.input:
-        with open(args.input) as f:
-            raw = f.read()
-    else:
-        raw = sys.stdin.read()
+    raw = open(args.input).read() if args.input else sys.stdin.read()
 
-    # Strip markdown code fences if Gemini wrapped the JSON
     raw = raw.strip()
     if raw.startswith("```"):
         raw = "\n".join(raw.split("\n")[1:])

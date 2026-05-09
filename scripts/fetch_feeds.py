@@ -45,6 +45,8 @@ def fetch_feed(feed_cfg: dict, output) -> None:
     feed_type = feed_cfg.get("type", "feed")
 
     try:
+        import socket
+        socket.setdefaulttimeout(TIMEOUT)
         parsed = feedparser.parse(url, request_headers={"User-Agent": "Mozilla/5.0"})
     except Exception as e:
         print(f"WARNING: [{name}] fetch error: {e}", file=sys.stderr)
