@@ -34,22 +34,19 @@ def default_since() -> datetime:
 
 def read_since(state_file: str) -> datetime:
     """
-    Same week as last run → since = this Monday (accumulate full week).
-    Different week or no state → since = last Monday (catch up from last run).
+    Always fetch from last Monday — so same-week re-runs accumulate the full week.
+    If last run was before last Monday (missed a week+), catch up from last run instead.
     """
+    last_monday = default_since()
     if os.path.exists(state_file):
         try:
             ts = open(state_file).read().strip()
             last_run = datetime.fromisoformat(ts).replace(tzinfo=timezone.utc)
-            monday = this_monday()
-            # Re-run within same week: always cover full week from Monday
-            if last_run >= monday:
-                return monday
-            # Last run was before this week: catch up from last run
-            return last_run
+            if last_run < last_monday:
+                return last_run  # been away > 1 week, catch up from last run
         except Exception:
             pass
-    return default_since()
+    return last_monday
 
 
 def entry_datetime(entry) -> datetime | None:
