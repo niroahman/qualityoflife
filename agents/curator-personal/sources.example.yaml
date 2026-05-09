@@ -1,0 +1,45 @@
+# Copy this to SilverBullet: Config/curator-pro/sources.yaml
+# Fill in your own channels, subreddits, and repos.
+
+youtube:
+  - name: "<redacted>"
+    channel_id: "<redacted>"
+
+  - name: "<redacted>"
+    channel_id: "<redacted>"
+
+  - name: "<redacted>"
+    channel_id: "<redacted>"
+
+reddit:
+  - subreddit: "golang"
+    period: "week"
+    limit: 25
+
+  - subreddit: "Python"
+    period: "week"
+    limit: 25
+
+  - subreddit: "softwarearchitecture"
+    period: "week"
+    limit: 15
+
+hackernews:
+  - type: "best"
+    limit: 30
+
+  - type: "ask"
+    limit: 15
+
+github_releases:
+  - repo: "golang/go"
+    label: "Go"
+
+  - repo: "python/cpython"
+    label: "Python"
+
+  - repo: "aws/aws-cdk"
+    label: "AWS CDK"
+
+  - repo: "anthropics/anthropic-sdk-python"
+    label: "Anthropic Python SDK"

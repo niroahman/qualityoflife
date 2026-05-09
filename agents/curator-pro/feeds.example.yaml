@@ -1,0 +1,53 @@
+# Copy this to SilverBullet: Config/curator-pro/feeds.yaml
+# Fill in your own feeds or remove sections you don't need.
+
+newsletters:
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: newsletter
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: newsletter
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: newsletter
+
+podcasts:
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: podcast
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: podcast
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: podcast
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: podcast
+
+tech_blogs:
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: blog
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: blog
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: blog
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: blog
+
+  - name: "<redacted>"
+    url: "<redacted>"
+    type: blog
