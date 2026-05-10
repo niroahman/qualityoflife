@@ -1,53 +1,29 @@
-# Copy this to SilverBullet: Config/curator-pro/feeds.yaml
-# Fill in your own feeds or remove sections you don't need.
+# Copy this to SilverBullet: config/curator-pro/feeds.md
+# Fill in your own feeds. Add new ones later via config/curator-pro/import.md
 
 newsletters:
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: newsletter
-
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: newsletter
-
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: newsletter
+  - name: "Example Newsletter"
+    url: "https://example.com/newsletter/feed"
 
 podcasts:
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: podcast
-
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: podcast
-
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: podcast
-
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: podcast
+  - name: "Example Podcast"
+    url: "https://example.com/podcast/rss"
 
 tech_blogs:
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: blog
+  - name: "Example Blog"
+    url: "https://example.com/feed"
 
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: blog
+youtube_channels:
+  # YouTube RSS format: https://www.youtube.com/feeds/videos.xml?channel_id=UCxxxxxxxx
+  - name: "Example Channel"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCxxxxxxxx"
 
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: blog
+reddit_forums:
+  # Reddit RSS format: https://www.reddit.com/r/SUBREDDIT/top.rss?t=week
+  - name: "r/example"
+    url: "https://www.reddit.com/r/example/top.rss?t=week"
 
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: blog
-
-  - name: "<redacted>"
-    url: "<redacted>"
-    type: blog
+github_releases:
+  # GitHub releases format: https://github.com/OWNER/REPO/releases.atom
+  - name: "Example Project"
+    url: "https://github.com/example/project/releases.atom"

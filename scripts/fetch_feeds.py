@@ -4,18 +4,65 @@
 import argparse
 import os
 import re
+import socket
+import ssl
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
+import certifi
 import feedparser
 import yaml
 from dotenv import load_dotenv
 
 load_dotenv()
 
-MAX_ITEMS = int(os.getenv("FEED_MAX_ITEMS", 5))
+ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
+
+MAX_ITEMS = int(os.getenv("FEED_MAX_ITEMS", 20))
 MAX_DESC = int(os.getenv("FEED_MAX_DESC_CHARS", 400))
 TIMEOUT = int(os.getenv("FEED_TIMEOUT_SECS", 10))
+
+socket.setdefaulttimeout(TIMEOUT)
+
+
+def this_monday() -> datetime:
+    """This week's Monday 00:00 UTC."""
+    today = datetime.now(timezone.utc)
+    return (today - timedelta(days=today.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def default_since() -> datetime:
+    """Last Monday 00:00 UTC — covers previous week + current week to today."""
+    return this_monday() - timedelta(weeks=1)
+
+
+def read_since(state_file: str) -> datetime:
+    """
+    Always fetch from last Monday — so same-week re-runs accumulate the full week.
+    If last run was before last Monday (missed a week+), catch up from last run instead.
+    """
+    last_monday = default_since()
+    if os.path.exists(state_file):
+        try:
+            with open(state_file) as f:
+                ts = f.read().strip()
+            last_run = datetime.fromisoformat(ts).replace(tzinfo=timezone.utc)
+            if last_run < last_monday:
+                return last_run  # been away > 1 week, catch up from last run
+        except Exception:
+            pass
+    return last_monday
+
+
+def entry_datetime(entry) -> datetime | None:
+    for attr in ("published_parsed", "updated_parsed"):
+        t = getattr(entry, attr, None)
+        if t:
+            try:
+                return datetime(*t[:6], tzinfo=timezone.utc)
+            except Exception:
+                pass
+    return None
 
 
 def strip_html(text: str) -> str:
@@ -29,23 +76,26 @@ def truncate(text: str, limit: int) -> str:
 
 
 def format_date(entry) -> str:
-    for attr in ("published_parsed", "updated_parsed"):
-        t = getattr(entry, attr, None)
-        if t:
-            try:
-                return datetime(*t[:6]).strftime("%Y-%m-%d")
-            except Exception:
-                pass
-    return "?"
+    dt = entry_datetime(entry)
+    return dt.strftime("%Y-%m-%d") if dt else "?"
 
 
-def fetch_feed(feed_cfg: dict, output) -> None:
+def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blogs") -> None:
     name = feed_cfg["name"]
     url = feed_cfg["url"]
-    feed_type = feed_cfg.get("type", "feed")
+    section_type_map = {
+        "podcasts": "podcast",
+        "newsletters": "newsletter",
+        "tech_blogs": "blog",
+        "youtube_channels": "youtube",
+        "reddit_forums": "reddit",
+        "github_releases": "release",
+    }
+    feed_type = feed_cfg.get("type") or section_type_map.get(section, "blog")
 
+    ua = "qualityoflife-bot/1.0 (personal digest)" if "reddit.com" in url else "Mozilla/5.0"
     try:
-        parsed = feedparser.parse(url, request_headers={"User-Agent": "Mozilla/5.0"})
+        parsed = feedparser.parse(url, request_headers={"User-Agent": ua})
     except Exception as e:
         print(f"WARNING: [{name}] fetch error: {e}", file=sys.stderr)
         return
@@ -54,7 +104,16 @@ def fetch_feed(feed_cfg: dict, output) -> None:
         print(f"WARNING: [{name}] empty or malformed feed", file=sys.stderr)
         return
 
-    for entry in parsed.entries[:MAX_ITEMS]:
+    count = 0
+    for entry in parsed.entries:
+        if count >= MAX_ITEMS:
+            break
+
+        dt = entry_datetime(entry)
+        if dt is None or dt < since:
+            continue
+
+        count += 1
         title = strip_html(entry.get("title", "(no title)"))
         link = entry.get("link", "")
         date = format_date(entry)
@@ -70,13 +129,16 @@ def fetch_feed(feed_cfg: dict, output) -> None:
             enclosures = entry.get("enclosures", [])
             if enclosures:
                 mp3 = enclosures[0].get("href", "")
-
             if desc:
                 output.write(f"{desc}\n\n")
             links_line = f"[🔗 Avaa jakson sivu]({podcast_link})"
             if mp3:
                 links_line += f" | [🎧 Kuuntele (MP3)]({mp3})"
             output.write(links_line + "\n")
+        elif feed_type == "youtube":
+            if desc:
+                output.write(f"{desc}\n\n")
+            output.write(f"[▶ Katso video]({link})\n")
         else:
             if desc:
                 output.write(f"{desc}\n")
@@ -88,7 +150,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--feeds", default="/tmp/runtime-feeds.yaml")
     parser.add_argument("--output", default=None, help="Output file (default: stdout)")
+    parser.add_argument("--since-file", default=None, help="Path to last-run state file")
     args = parser.parse_args()
+
+    since = read_since(args.since_file) if args.since_file else default_since()
+    print(f"Fetching entries since: {since.strftime('%Y-%m-%d %H:%M')} UTC", file=sys.stderr)
 
     with open(args.feeds) as f:
         config = yaml.safe_load(f)
@@ -100,14 +166,21 @@ def main() -> None:
     out = open(args.output, "w") if args.output else sys.stdout
 
     try:
-        for section in ("newsletters", "podcasts", "tech_blogs"):
+        section_labels = {
+            "newsletters": "Uutiskirjeet",
+            "podcasts": "Podcastit",
+            "tech_blogs": "Tech-blogit",
+            "youtube_channels": "YouTube",
+            "reddit_forums": "Reddit",
+            "github_releases": "GitHub Releases",
+        }
+        for section in ("newsletters", "podcasts", "tech_blogs", "youtube_channels", "reddit_forums", "github_releases"):
             feeds = config.get(section, [])
             if not feeds:
                 continue
-            section_label = {"newsletters": "Uutiskirjeet", "podcasts": "Podcastit", "tech_blogs": "Tech-blogit"}[section]
-            out.write(f"## {section_label}\n\n")
+            out.write(f"## {section_labels[section]}\n\n")
             for feed_cfg in feeds:
-                fetch_feed(feed_cfg, out)
+                fetch_feed(feed_cfg, out, since, section)
     finally:
         if args.output:
             out.close()

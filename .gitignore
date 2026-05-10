@@ -1,4 +1,6 @@
 .env
+PRE_INSTRUCTIONS.md
+.claude/settings.local.json
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -6,6 +8,7 @@ dist/
 build/
 .venv/
 venv/
+.state/
 /tmp/runtime-*.yaml
 /tmp/runtime-prompt.md
 /tmp/feeds_raw*.md
