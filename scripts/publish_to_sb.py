@@ -57,7 +57,7 @@ PERSONAL_CATEGORIES = [
 
 def render_item(item: dict, checked_links: set[str]) -> list[str]:
     lines = []
-    url = item.get("podcast_sivu") or item["linkki"] if is_podcast(item) else item["linkki"]
+    url = item.get("podcast_sivu") or item["linkki"]
     tick = "x" if url in checked_links else " "
     lines += [
         f"- [{tick}] **[{item['otsikko']}]({item['linkki']})**",

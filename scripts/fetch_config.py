@@ -33,7 +33,7 @@ def main() -> None:
 
     profile = fetch_page(session, f"config/curator-{agent}/profile.md")
     feeds = fetch_page(session, f"config/curator-{agent}/feeds.md")
-    sources = fetch_page(session, f"config/curator-{agent}/sources.md")
+
     with open(args.template) as f:
         prompt = f.read().replace("{{PROFILE}}", profile)
 
@@ -41,8 +41,6 @@ def main() -> None:
         f.write(prompt)
     with open("/tmp/runtime-feeds.yaml", "w") as f:
         f.write(feeds)
-    with open("/tmp/runtime-sources.yaml", "w") as f:
-        f.write(sources)
 
     print(f"Config fetched for curator-{agent}. Runtime files written to /tmp/.")
 

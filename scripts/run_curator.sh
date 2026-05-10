@@ -9,7 +9,7 @@ STATE_FILE="$REPO_DIR/.state/last-run-$AGENT.txt"
 FEEDS_RAW=$(mktemp /tmp/feeds_raw_XXXXXX.md)
 
 cleanup() {
-  rm -f "$FEEDS_RAW" /tmp/runtime-prompt.md /tmp/runtime-feeds.yaml /tmp/runtime-sources.yaml
+  rm -f "$FEEDS_RAW" /tmp/runtime-prompt.md /tmp/runtime-feeds.yaml
 }
 trap cleanup EXIT
 

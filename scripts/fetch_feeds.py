@@ -24,6 +24,16 @@ TIMEOUT = int(os.getenv("FEED_TIMEOUT_SECS", 10))
 
 socket.setdefaulttimeout(TIMEOUT)
 
+# (feed_type, display_label) — insertion order defines digest section order
+_SECTIONS: dict[str, tuple[str, str]] = {
+    "newsletters":     ("newsletter", "Uutiskirjeet"),
+    "podcasts":        ("podcast",    "Podcastit"),
+    "tech_blogs":      ("blog",       "Tech-blogit"),
+    "youtube_channels": ("youtube",   "YouTube"),
+    "reddit_forums":   ("reddit",     "Reddit"),
+    "github_releases": ("release",    "GitHub Releases"),
+}
+
 
 def this_monday() -> datetime:
     """This week's Monday 00:00 UTC."""
@@ -83,15 +93,7 @@ def format_date(entry) -> str:
 def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blogs") -> None:
     name = feed_cfg["name"]
     url = feed_cfg["url"]
-    section_type_map = {
-        "podcasts": "podcast",
-        "newsletters": "newsletter",
-        "tech_blogs": "blog",
-        "youtube_channels": "youtube",
-        "reddit_forums": "reddit",
-        "github_releases": "release",
-    }
-    feed_type = feed_cfg.get("type") or section_type_map.get(section, "blog")
+    feed_type = feed_cfg.get("type") or _SECTIONS.get(section, ("blog", ""))[0]
 
     ua = "qualityoflife-bot/1.0 (personal digest)" if "reddit.com" in url else "Mozilla/5.0"
     try:
@@ -146,6 +148,16 @@ def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blo
         output.write("\n---\n\n")
 
 
+def write_feeds(config: dict, output, since: datetime) -> None:
+    for section, (_, label) in _SECTIONS.items():
+        feeds = config.get(section, [])
+        if not feeds:
+            continue
+        output.write(f"## {label}\n\n")
+        for feed_cfg in feeds:
+            fetch_feed(feed_cfg, output, since, section)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--feeds", default="/tmp/runtime-feeds.yaml")
@@ -163,27 +175,11 @@ def main() -> None:
         print("WARNING: feeds config is empty", file=sys.stderr)
         return
 
-    out = open(args.output, "w") if args.output else sys.stdout
-
-    try:
-        section_labels = {
-            "newsletters": "Uutiskirjeet",
-            "podcasts": "Podcastit",
-            "tech_blogs": "Tech-blogit",
-            "youtube_channels": "YouTube",
-            "reddit_forums": "Reddit",
-            "github_releases": "GitHub Releases",
-        }
-        for section in ("newsletters", "podcasts", "tech_blogs", "youtube_channels", "reddit_forums", "github_releases"):
-            feeds = config.get(section, [])
-            if not feeds:
-                continue
-            out.write(f"## {section_labels[section]}\n\n")
-            for feed_cfg in feeds:
-                fetch_feed(feed_cfg, out, since, section)
-    finally:
-        if args.output:
-            out.close()
+    if args.output:
+        with open(args.output, "w") as out:
+            write_feeds(config, out, since)
+    else:
+        write_feeds(config, sys.stdout, since)
 
 
 if __name__ == "__main__":
