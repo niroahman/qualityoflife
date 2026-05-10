@@ -25,8 +25,8 @@ TIMEOUT = int(os.getenv("FEED_TIMEOUT_SECS", 10))
 socket.setdefaulttimeout(TIMEOUT)
 
 _SECTION_TYPE_MAP = {
-    "podcasts": "podcast",
     "newsletters": "newsletter",
+    "podcasts": "podcast",
     "tech_blogs": "blog",
     "youtube_channels": "youtube",
     "reddit_forums": "reddit",
