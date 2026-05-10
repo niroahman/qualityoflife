@@ -5,14 +5,18 @@ import argparse
 import os
 import re
 import socket
+import ssl
 import sys
 from datetime import datetime, timedelta, timezone
 
+import certifi
 import feedparser
 import yaml
 from dotenv import load_dotenv
 
 load_dotenv()
+
+ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
 
 MAX_ITEMS = int(os.getenv("FEED_MAX_ITEMS", 20))
 MAX_DESC = int(os.getenv("FEED_MAX_DESC_CHARS", 400))
@@ -40,7 +44,8 @@ def read_since(state_file: str) -> datetime:
     last_monday = default_since()
     if os.path.exists(state_file):
         try:
-            ts = open(state_file).read().strip()
+            with open(state_file) as f:
+                ts = f.read().strip()
             last_run = datetime.fromisoformat(ts).replace(tzinfo=timezone.utc)
             if last_run < last_monday:
                 return last_run  # been away > 1 week, catch up from last run
@@ -75,13 +80,22 @@ def format_date(entry) -> str:
     return dt.strftime("%Y-%m-%d") if dt else "?"
 
 
-def fetch_feed(feed_cfg: dict, output, since: datetime) -> None:
+def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blogs") -> None:
     name = feed_cfg["name"]
     url = feed_cfg["url"]
-    feed_type = feed_cfg.get("type", "feed")
+    section_type_map = {
+        "podcasts": "podcast",
+        "newsletters": "newsletter",
+        "tech_blogs": "blog",
+        "youtube_channels": "youtube",
+        "reddit_forums": "reddit",
+        "github_releases": "release",
+    }
+    feed_type = feed_cfg.get("type") or section_type_map.get(section, "blog")
 
+    ua = "qualityoflife-bot/1.0 (personal digest)" if "reddit.com" in url else "Mozilla/5.0"
     try:
-        parsed = feedparser.parse(url, request_headers={"User-Agent": "Mozilla/5.0"})
+        parsed = feedparser.parse(url, request_headers={"User-Agent": ua})
     except Exception as e:
         print(f"WARNING: [{name}] fetch error: {e}", file=sys.stderr)
         return
@@ -96,7 +110,7 @@ def fetch_feed(feed_cfg: dict, output, since: datetime) -> None:
             break
 
         dt = entry_datetime(entry)
-        if dt and dt < since:
+        if dt is None or dt < since:
             continue
 
         count += 1
@@ -121,6 +135,10 @@ def fetch_feed(feed_cfg: dict, output, since: datetime) -> None:
             if mp3:
                 links_line += f" | [🎧 Kuuntele (MP3)]({mp3})"
             output.write(links_line + "\n")
+        elif feed_type == "youtube":
+            if desc:
+                output.write(f"{desc}\n\n")
+            output.write(f"[▶ Katso video]({link})\n")
         else:
             if desc:
                 output.write(f"{desc}\n")
@@ -148,14 +166,21 @@ def main() -> None:
     out = open(args.output, "w") if args.output else sys.stdout
 
     try:
-        for section in ("newsletters", "podcasts", "tech_blogs"):
+        section_labels = {
+            "newsletters": "Uutiskirjeet",
+            "podcasts": "Podcastit",
+            "tech_blogs": "Tech-blogit",
+            "youtube_channels": "YouTube",
+            "reddit_forums": "Reddit",
+            "github_releases": "GitHub Releases",
+        }
+        for section in ("newsletters", "podcasts", "tech_blogs", "youtube_channels", "reddit_forums", "github_releases"):
             feeds = config.get(section, [])
             if not feeds:
                 continue
-            section_label = {"newsletters": "Uutiskirjeet", "podcasts": "Podcastit", "tech_blogs": "Tech-blogit"}[section]
-            out.write(f"## {section_label}\n\n")
+            out.write(f"## {section_labels[section]}\n\n")
             for feed_cfg in feeds:
-                fetch_feed(feed_cfg, out, since)
+                fetch_feed(feed_cfg, out, since, section)
     finally:
         if args.output:
             out.close()
