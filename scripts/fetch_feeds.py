@@ -147,6 +147,26 @@ def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blo
         output.write("\n---\n\n")
 
 
+_SECTION_LABELS = {
+    "newsletters": "Uutiskirjeet",
+    "podcasts": "Podcastit",
+    "tech_blogs": "Tech-blogit",
+    "youtube_channels": "YouTube",
+    "reddit_forums": "Reddit",
+    "github_releases": "GitHub Releases",
+}
+
+
+def write_feeds(config: dict, output, since: datetime) -> None:
+    for section in _SECTION_TYPE_MAP:
+        feeds = config.get(section, [])
+        if not feeds:
+            continue
+        output.write(f"## {_SECTION_LABELS[section]}\n\n")
+        for feed_cfg in feeds:
+            fetch_feed(feed_cfg, output, since, section)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--feeds", default="/tmp/runtime-feeds.yaml")
@@ -164,29 +184,11 @@ def main() -> None:
         print("WARNING: feeds config is empty", file=sys.stderr)
         return
 
-    section_labels = {
-        "newsletters": "Uutiskirjeet",
-        "podcasts": "Podcastit",
-        "tech_blogs": "Tech-blogit",
-        "youtube_channels": "YouTube",
-        "reddit_forums": "Reddit",
-        "github_releases": "GitHub Releases",
-    }
-
-    def _write_feeds(out) -> None:
-        for section in _SECTION_TYPE_MAP:
-            feeds = config.get(section, [])
-            if not feeds:
-                continue
-            out.write(f"## {section_labels[section]}\n\n")
-            for feed_cfg in feeds:
-                fetch_feed(feed_cfg, out, since, section)
-
     if args.output:
         with open(args.output, "w") as out:
-            _write_feeds(out)
+            write_feeds(config, out, since)
     else:
-        _write_feeds(sys.stdout)
+        write_feeds(config, sys.stdout, since)
 
 
 if __name__ == "__main__":
