@@ -24,13 +24,14 @@ TIMEOUT = int(os.getenv("FEED_TIMEOUT_SECS", 10))
 
 socket.setdefaulttimeout(TIMEOUT)
 
-_SECTION_TYPE_MAP = {
-    "newsletters": "newsletter",
-    "podcasts": "podcast",
-    "tech_blogs": "blog",
-    "youtube_channels": "youtube",
-    "reddit_forums": "reddit",
-    "github_releases": "release",
+# (feed_type, display_label) — insertion order defines digest section order
+_SECTIONS: dict[str, tuple[str, str]] = {
+    "newsletters":     ("newsletter", "Uutiskirjeet"),
+    "podcasts":        ("podcast",    "Podcastit"),
+    "tech_blogs":      ("blog",       "Tech-blogit"),
+    "youtube_channels": ("youtube",   "YouTube"),
+    "reddit_forums":   ("reddit",     "Reddit"),
+    "github_releases": ("release",    "GitHub Releases"),
 }
 
 
@@ -92,7 +93,7 @@ def format_date(entry) -> str:
 def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blogs") -> None:
     name = feed_cfg["name"]
     url = feed_cfg["url"]
-    feed_type = feed_cfg.get("type") or _SECTION_TYPE_MAP.get(section, "blog")
+    feed_type = feed_cfg.get("type") or _SECTIONS.get(section, ("blog", ""))[0]
 
     ua = "qualityoflife-bot/1.0 (personal digest)" if "reddit.com" in url else "Mozilla/5.0"
     try:
@@ -147,22 +148,12 @@ def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blo
         output.write("\n---\n\n")
 
 
-_SECTION_LABELS = {
-    "newsletters": "Uutiskirjeet",
-    "podcasts": "Podcastit",
-    "tech_blogs": "Tech-blogit",
-    "youtube_channels": "YouTube",
-    "reddit_forums": "Reddit",
-    "github_releases": "GitHub Releases",
-}
-
-
 def write_feeds(config: dict, output, since: datetime) -> None:
-    for section in _SECTION_TYPE_MAP:
+    for section, (_, label) in _SECTIONS.items():
         feeds = config.get(section, [])
         if not feeds:
             continue
-        output.write(f"## {_SECTION_LABELS[section]}\n\n")
+        output.write(f"## {label}\n\n")
         for feed_cfg in feeds:
             fetch_feed(feed_cfg, output, since, section)
 
