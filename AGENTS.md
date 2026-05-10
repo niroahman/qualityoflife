@@ -29,8 +29,6 @@ All user config lives in SilverBullet under `config/curator-{agent}/`:
 |----------------|-------------------------------------------------------|
 | `profile.md`   | User profile injected as `{{PROFILE}}`                |
 | `feeds.md`     | YAML: newsletters, podcasts, tech_blogs, youtube_channels, reddit_forums, github_releases |
-| `sources.md`   | Placeholder (not yet used)                            |
-| `favorites.md` | Suosikkikirjat/pelit/sarjat injected as `{{FAVORITES}}` — optional, personal only |
 | `import.md`    | **Pending imports** — see below                       |
 
 Personal digest output is grouped by category:

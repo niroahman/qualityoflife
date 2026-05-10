@@ -8,12 +8,10 @@ import sys
 from auth import SB_BASE_URL, get_session
 
 
-def fetch_page(session, path: str, optional: bool = False) -> str:
+def fetch_page(session, path: str) -> str:
     url = f"{SB_BASE_URL}/.fs/{path}"
     resp = session.get(url, timeout=10)
     if resp.status_code != 200:
-        if optional:
-            return ""
         print(f"ERROR: Failed to fetch '{path}': HTTP {resp.status_code}", file=sys.stderr)
         sys.exit(1)
     resp.encoding = "utf-8"
@@ -36,10 +34,8 @@ def main() -> None:
     profile = fetch_page(session, f"config/curator-{agent}/profile.md")
     feeds = fetch_page(session, f"config/curator-{agent}/feeds.md")
     sources = fetch_page(session, f"config/curator-{agent}/sources.md")
-    favorites = fetch_page(session, f"config/curator-{agent}/favorites.md", optional=True)
-
     with open(args.template) as f:
-        prompt = f.read().replace("{{PROFILE}}", profile).replace("{{FAVORITES}}", favorites)
+        prompt = f.read().replace("{{PROFILE}}", profile)
 
     with open("/tmp/runtime-prompt.md", "w") as f:
         f.write(prompt)
