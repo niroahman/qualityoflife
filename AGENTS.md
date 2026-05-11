@@ -9,17 +9,16 @@ filtered by Gemini, and published to SilverBullet.
 fetch_config.py  →  fetch_feeds.py  →  gemini filter  →  publish_to_sb.py
 ```
 
-Run anywhere: `curator pro` or `curator personal`  
-Direct: `bash scripts/run_curator.sh pro`
+Run: `./scripts/run_curator.sh pro` or `./scripts/run_curator.sh personal`
 
 State file: `.state/last-run-{agent}.txt` — updated on success, controls fetch window.
 
 ## Agents
 
-| Agent      | Command            | Digest page           | Topics                                      |
-|------------|--------------------|-----------------------|---------------------------------------------|
-| `pro`      | `curator pro`      | `Digest/YYYY-Www-pro` | Tech, Go, Python, AI, architecture          |
-| `personal` | `curator personal` | `Digest/YYYY-Www-personal` | Homelab, emulointi, e-readers, pelit, TV, kirjat |
+| Agent      | Command                              | Digest page           | Topics                                      |
+|------------|--------------------------------------|-----------------------|---------------------------------------------|
+| `pro`      | `./scripts/run_curator.sh pro`       | `Digest/YYYY-Www-pro` | Tech, Go, Python, AI, architecture          |
+| `personal` | `./scripts/run_curator.sh personal`  | `Digest/YYYY-Www-personal` | Homelab, emulointi, e-readers, pelit, TV, kirjat |
 
 ## SilverBullet config (personal, not in repo)
 
