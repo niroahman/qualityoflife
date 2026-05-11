@@ -2,11 +2,12 @@
 
 import os
 import sys
+from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path.home() / ".secrets" / "qualityoflife" / ".env")
 
 _REQUIRED = ["SB_BASE_URL", "CF_ACCESS_CLIENT_ID", "CF_ACCESS_CLIENT_SECRET", "SB_USER", "SB_PASSWORD"]
 for _var in _REQUIRED:

@@ -15,7 +15,7 @@ All personal data (profile, feeds, interests) lives in SilverBullet — not here
 ## Setup
 
 1. Clone or fork this repo
-2. Copy `.env.example` → `.env` and fill in your values
+2. Copy `.env.example` → `~/.secrets/qualityoflife/.env` and fill in your values (`chmod 600` it)
 3. Create config pages in your SilverBullet (see below)
 4. Install dependencies: `pip install -r requirements.txt`
 5. Run: `./scripts/run_curator.sh pro`
