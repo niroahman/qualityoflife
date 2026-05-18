@@ -27,9 +27,9 @@ socket.setdefaulttimeout(TIMEOUT)
 
 # (feed_type, display_label) — insertion order defines digest section order
 _SECTIONS: dict[str, tuple[str, str]] = {
-    "newsletters":     ("newsletter", "Uutiskirjeet"),
-    "podcasts":        ("podcast",    "Podcastit"),
-    "tech_blogs":      ("blog",       "Tech-blogit"),
+    "newsletters":     ("newsletter", "Newsletters"),
+    "podcasts":        ("podcast",    "Podcasts"),
+    "tech_blogs":      ("blog",       "Tech Blogs"),
     "youtube_channels": ("youtube",   "YouTube"),
     "reddit_forums":   ("reddit",     "Reddit"),
     "github_releases": ("release",    "GitHub Releases"),
@@ -124,7 +124,7 @@ def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blo
         desc = truncate(desc, MAX_DESC)
 
         output.write(f"### [{title}]({link})\n")
-        output.write(f"*Lähde: {name} | Julkaistu: {date}*\n")
+        output.write(f"*Source: {name} | Published: {date}*\n")
 
         if feed_type == "podcast":
             podcast_link = entry.get("link", "")
@@ -134,14 +134,14 @@ def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blo
                 mp3 = enclosures[0].get("href", "")
             if desc:
                 output.write(f"{desc}\n\n")
-            links_line = f"[🔗 Avaa jakson sivu]({podcast_link})"
+            links_line = f"[🔗 Episode page]({podcast_link})"
             if mp3:
-                links_line += f" | [🎧 Kuuntele (MP3)]({mp3})"
+                links_line += f" | [🎧 Listen (MP3)]({mp3})"
             output.write(links_line + "\n")
         elif feed_type == "youtube":
             if desc:
                 output.write(f"{desc}\n\n")
-            output.write(f"[▶ Katso video]({link})\n")
+            output.write(f"[▶ Watch video]({link})\n")
         else:
             if desc:
                 output.write(f"{desc}\n")

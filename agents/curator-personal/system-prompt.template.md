@@ -18,28 +18,28 @@ Favorites hints:
 
 CATEGORY field — use exactly these values:
 - "homelab" — self-hosting, Docker, media server, NAS, network
-- "emulointi" — emulation, retro handhelds, RetroArch, firmware
-- "lukulaite" — e-readers, e-ink devices, reading hardware
-- "pelit" — PC/console/retro games, releases, reviews
-- "tv_elokuva" — TV series, movies, trailers, streaming
-- "kirjat" — book news, releases, sci-fi, fantasy, thriller
-- "sijoitukset_raha" — investing, personal finance, stocks, index funds
-- "maailma_ilmiot" — world events, society, science, future trends, tech trends
+- "emulation" — emulation, retro handhelds, RetroArch, firmware
+- "ereader" — e-readers, e-ink devices, reading hardware
+- "games" — PC/console/retro games, releases, reviews
+- "tv_film" — TV series, movies, trailers, streaming
+- "books" — book news, releases, sci-fi, fantasy, thriller
+- "investing" — investing, personal finance, stocks, index funds
+- "world_trends" — world events, society, science, future trends, tech trends
 
 OUTPUT FORMAT (JSON):
 [
   {
-    "otsikko": "...",
-    "lahde": "...",
-    "lahde_tyyppi": "artikkeli | podcast | video | release",
-    "kategoria": "homelab",
-    "pisteet": 9,
-    "perustelu": "One sentence in Finnish explaining why this is worth reading/watching",
-    "linkki": "https://...",
-    "podcast_sivu": "https://...",
+    "title": "...",
+    "source": "...",
+    "source_type": "article | podcast | video | release",
+    "category": "homelab",
+    "score": 9,
+    "reasoning": "One sentence explaining why this is worth reading/watching",
+    "url": "https://...",
+    "podcast_page": "https://...",
     "podcast_mp3": "https://..."
   }
 ]
 
-Keep Markdown links [🔗 Avaa jakson sivu] and [🎧 Kuuntele (MP3)] as-is in output.
+Keep Markdown links [🔗 Episode page] and [🎧 Listen (MP3)] as-is in output.
 Return ONLY JSON. No surrounding explanation. Include only items scoring >= 7.

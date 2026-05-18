@@ -40,7 +40,7 @@ State file: `.state/last-run-{agent}.txt` — updated on success, controls fetch
 | Agent      | Command                              | Digest page           | Topics                                      |
 |------------|--------------------------------------|-----------------------|---------------------------------------------|
 | `pro`      | `./scripts/run_curator.sh pro`       | `Digest/YYYY-Www-pro` | Tech, Go, Python, AI, architecture          |
-| `personal` | `./scripts/run_curator.sh personal`  | `Digest/YYYY-Www-personal` | Homelab, emulointi, e-readers, pelit, TV, kirjat |
+| `personal` | `./scripts/run_curator.sh personal`  | `Digest/YYYY-Www-personal` | Homelab, emulation, e-readers, games, TV, books |
 
 ## SilverBullet config (personal, not in repo)
 
@@ -53,13 +53,13 @@ All user config lives in SilverBullet under `config/curator-{agent}/`:
 | `import.md`    | **Pending imports** — see below                       |
 
 Personal digest output is grouped by category:
-🏠 Homelab · 🕹️ Emulointi & Retro · 📖 Lukulaitteet · 🎮 Pelit · 📺 TV & Elokuvat · 📚 Kirjat
+🏠 Homelab · 🕹️ Emulation & Retro · 📖 E-Readers · 🎮 Games · 📺 TV & Films · 📚 Books
 
 ## Import workflow
 
 `config/curator-{agent}/import.md` in SilverBullet is a queue for
 new feeds/channels. Each line is a free-text hint,
-e.g. "melkeyn youtube kanava" or "add syntax podcast".
+e.g. "maybe this youtube channel" or "add syntax podcast".
 
 **At the start of every session, check both agents' import files:**
 
@@ -103,8 +103,8 @@ blocks direct scraping with consent redirects.
 
 `agents/curator-{agent}/system-prompt.template.md`
 
-- Pro: `{{PROFILE}}` replaced at runtime. JSON fields: `otsikko`, `linkki`, `lahde`, `lahde_tyyppi`, `pisteet`, `perustelu`, `podcast_sivu`, `podcast_mp3`.
-- Personal: same + `{{FAVORITES}}` replaced from `favorites.md` (optional). Extra JSON field: `kategoria` (homelab | emulointi | lukulaite | pelit | tv_elokuva | kirjat).
+- Pro: `{{PROFILE}}` replaced at runtime. JSON fields: `title`, `url`, `source`, `source_type`, `score`, `reasoning`, `podcast_page`, `podcast_mp3`.
+- Personal: same + `{{FAVORITES}}` replaced from `favorites.md` (optional). Extra JSON field: `category` (homelab | emulation | ereader | games | tv_film | books | investing | world_trends).
 
 ## Feeds examples
 
