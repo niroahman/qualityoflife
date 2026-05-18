@@ -150,13 +150,19 @@ def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blo
 
 
 def write_feeds(config: dict, output, since: datetime) -> None:
+    total = sum(len(config.get(s, [])) for s in _SECTIONS)
+    idx = 0
     for section, (_, label) in _SECTIONS.items():
         feeds = config.get(section, [])
         if not feeds:
             continue
         output.write(f"## {label}\n\n")
         for feed_cfg in feeds:
+            idx += 1
+            print(f"\r[{idx}/{total}] {feed_cfg['name']:<40}", end="", flush=True, file=sys.stderr)
             fetch_feed(feed_cfg, output, since, section)
+    if total:
+        print(file=sys.stderr)
 
 
 def main() -> None:
