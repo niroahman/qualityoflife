@@ -3,6 +3,28 @@
 This repo runs AI-curated weekly digests fetched from RSS/Atom/YouTube feeds,
 filtered by Gemini, and published to SilverBullet.
 
+## Environment setup
+
+Secrets live in `~/.secrets/qualityoflife/.env`. Must be loaded before running scripts.
+
+Python scripts (`scripts/auth.py`) load it automatically via `python-dotenv` — no manual step needed when using the venv.
+
+For shell-level commands or ad-hoc runs:
+
+```bash
+# Activate venv + load env
+source .venv/bin/activate
+set -a; source ~/.secrets/qualityoflife/.env; set +a
+```
+
+Ad-hoc Python (no shell sourcing needed — dotenv handles it):
+
+```bash
+.venv/bin/python scripts/some_script.py
+```
+
+Required vars listed in `.env.example`.
+
 ## Pipeline overview
 
 ```

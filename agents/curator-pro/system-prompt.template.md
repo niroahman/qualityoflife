@@ -33,4 +33,4 @@ PALAUTUSFORMAATTI (JSON):
 ]
 
 Säilytä Markdown-linkit [🔗 Avaa jakson sivu] ja [🎧 Kuuntele (MP3)] tulosteessa sellaisenaan.
-Palauta VAIN JSON. Ei selittelyjä ympärille. Sisällytä vain pisteet >= 7.
+Palauta VAIN JSON. Ei selittelyjä ympärille. Sisällytä vain pisteet >= 5. Sisällytä enintään 30 kohdetta.

@@ -254,6 +254,12 @@ def main() -> None:
         print(f"ERROR: Invalid JSON input: {e}", file=sys.stderr)
         sys.exit(1)
 
+    before = len(items)
+    items = [i for i in items if i.get("linkki")]
+    dropped = before - len(items)
+    if dropped:
+        print(f"WARNING: {dropped} item(s) dropped — missing 'linkki' field", file=sys.stderr)
+
     session = get_session()
     page = page_name(args.agent)
     page_url = f"{SB_BASE_URL}/.fs/{page}.md"
