@@ -53,7 +53,7 @@ All user config lives in SilverBullet under `config/curator-{agent}/`:
 | `import.md`    | **Pending imports** — see below                       |
 
 Personal digest output is grouped by category:
-🏠 Homelab · 🕹️ Emulation & Retro · 📖 E-Readers · 🎮 Games · 📺 TV & Films · 📚 Books
+🏠 Homelab · 🕹️ Emulation & Retro · 📖 E-Readers · 🎮 Games · 📺 TV & Films · 📚 Books · 💰 Investing & Money · 🌍 World & Trends
 
 ## Import workflow
 
@@ -98,13 +98,15 @@ blocks direct scraping with consent redirects.
 - `podcasts` → type: podcast (renders episode page + MP3 links)
 - `tech_blogs` → type: blog
 - `youtube_channels` → type: youtube (renders ▶ video link)
+- `reddit_forums` → type: reddit
+- `github_releases` → type: release (major/minor versions only)
 
 ## System prompt templates
 
 `agents/curator-{agent}/system-prompt.template.md`
 
 - Pro: `{{PROFILE}}` replaced at runtime. JSON fields: `title`, `url`, `source`, `source_type`, `score`, `reasoning`, `podcast_page`, `podcast_mp3`.
-- Personal: same + `{{FAVORITES}}` replaced from `favorites.md` (optional). Extra JSON field: `category` (homelab | emulation | ereader | games | tv_film | books | investing | world_trends).
+- Personal: same. Extra JSON field: `category` (homelab | emulation | ereader | games | tv_film | books | investing | world_trends).
 
 ## Feeds examples
 
