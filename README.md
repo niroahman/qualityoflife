@@ -1,5 +1,8 @@
 # qualityoflife
 
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/13a319eb-e7ec-420c-a26c-26c7f9853af7" />
+
+
 Public repo for personal AI agents. Fork it, point it at your own SilverBullet.
 
 **Principle: repo is the engine, SilverBullet is the fuel.**  
