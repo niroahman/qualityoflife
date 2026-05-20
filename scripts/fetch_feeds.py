@@ -14,6 +14,9 @@ import certifi
 import feedparser
 import yaml
 from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qs
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound, VideoUnavailable
 
 load_dotenv(Path.home() / ".secrets" / "qualityoflife" / ".env")
 
@@ -22,6 +25,7 @@ ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=ce
 MAX_ITEMS = int(os.getenv("FEED_MAX_ITEMS", 20))
 MAX_DESC = int(os.getenv("FEED_MAX_DESC_CHARS", 400))
 TIMEOUT = int(os.getenv("FEED_TIMEOUT_SECS", 10))
+MAX_TRANSCRIPT = int(os.getenv("FEED_MAX_TRANSCRIPT_CHARS", 3000))
 
 socket.setdefaulttimeout(TIMEOUT)
 
@@ -91,6 +95,27 @@ def format_date(entry) -> str:
     return dt.strftime("%Y-%m-%d") if dt else "?"
 
 
+def extract_video_id(url: str) -> str | None:
+    parsed = urlparse(url)
+    if parsed.hostname in ("youtu.be",):
+        return parsed.path.lstrip("/")
+    if parsed.hostname in ("www.youtube.com", "youtube.com"):
+        qs = parse_qs(parsed.query)
+        return qs.get("v", [None])[0]
+    return None
+
+
+def fetch_transcript(video_id: str) -> str | None:
+    try:
+        snippets = YouTubeTranscriptApi.get_transcript(video_id)
+        text = " ".join(s["text"] for s in snippets)
+        return truncate(text, MAX_TRANSCRIPT)
+    except (TranscriptsDisabled, NoTranscriptFound, VideoUnavailable):
+        return None
+    except Exception:
+        return None
+
+
 def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blogs") -> None:
     name = feed_cfg["name"]
     url = feed_cfg["url"]
@@ -142,6 +167,11 @@ def fetch_feed(feed_cfg: dict, output, since: datetime, section: str = "tech_blo
             if desc:
                 output.write(f"{desc}\n\n")
             output.write(f"[▶ Watch video]({link})\n")
+            video_id = extract_video_id(link)
+            if video_id:
+                transcript = fetch_transcript(video_id)
+                if transcript:
+                    output.write(f"\n<details>\n<summary>Transcript</summary>\n\n{transcript}\n\n</details>\n")
         else:
             if desc:
                 output.write(f"{desc}\n")
