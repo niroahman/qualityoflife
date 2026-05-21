@@ -7,6 +7,7 @@ import re
 import socket
 import ssl
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -26,6 +27,7 @@ MAX_ITEMS = int(os.getenv("FEED_MAX_ITEMS", 20))
 MAX_DESC = int(os.getenv("FEED_MAX_DESC_CHARS", 400))
 TIMEOUT = int(os.getenv("FEED_TIMEOUT_SECS", 10))
 MAX_TRANSCRIPT = int(os.getenv("FEED_MAX_TRANSCRIPT_CHARS", 3000))
+TRANSCRIPT_COOLDOWN = float(os.getenv("FEED_TRANSCRIPT_COOLDOWN_SECS", 2.0))
 
 socket.setdefaulttimeout(TIMEOUT)
 
@@ -107,8 +109,9 @@ def extract_video_id(url: str) -> str | None:
 
 def fetch_transcript(video_id: str) -> str | None:
     try:
-        snippets = YouTubeTranscriptApi.get_transcript(video_id)
-        text = " ".join(s["text"] for s in snippets)
+        result = YouTubeTranscriptApi().fetch(video_id)
+        text = " ".join(s.text for s in result)
+        time.sleep(TRANSCRIPT_COOLDOWN)
         return truncate(text, MAX_TRANSCRIPT)
     except (TranscriptsDisabled, NoTranscriptFound, VideoUnavailable):
         return None
