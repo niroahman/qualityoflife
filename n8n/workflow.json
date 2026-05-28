@@ -1,0 +1,139 @@
+{
+  "name": "qualityoflife n8n (Tech digest)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        -112
+      ],
+      "id": "a2ccdf01-45ae-4a75-9c34-e2b00d137058",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://simonwillison.net/atom/everything/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -96
+      ],
+      "id": "70cfc5da-ff12-4279-a1cf-9cd5fb8da4a2",
+      "name": "simonwillison.net"
+    },
+    {
+      "parameters": {
+        "url": "https://dev.to/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -256
+      ],
+      "id": "8f8aaa5b-a191-4a3d-ab82-520fd8d96353",
+      "name": "dev.to"
+    },
+    {
+      "parameters": {
+        "url": "https://hnrss.org/frontpage",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -432
+      ],
+      "id": "455821c7-5acf-473c-bb1d-a32cff9217fc",
+      "name": "hnrss.org"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        128,
+        -304
+      ],
+      "id": "a7275b54-9fa3-477a-8c19-c36912fcfa88",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "hnrss.org",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "dev.to",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "simonwillison.net",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "hnrss.org": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dev.to": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "simonwillison.net": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2ce9291f-9f7c-4fdf-ac43-f51ff19c552a",
+  "meta": {
+    "instanceId": "63425becdb25e3fe67dabe1ae2db9b357e60b71a33fbdb4cd81f8839a882d05c"
+  },
+  "id": "DswCnSPaPoAei8Yp",
+  "tags": []
+}
