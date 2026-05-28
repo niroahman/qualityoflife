@@ -52,7 +52,8 @@
         -432
       ],
       "id": "455821c7-5acf-473c-bb1d-a32cff9217fc",
-      "name": "hnrss.org"
+      "name": "hnrss.org",
+      "disabled": true
     },
     {
       "parameters": {
@@ -130,19 +131,6 @@
     },
     {
       "parameters": {
-        "maxItems": 15
-      },
-      "type": "n8n-nodes-base.limit",
-      "typeVersion": 1,
-      "position": [
-        288,
-        -272
-      ],
-      "id": "9150e170-df60-4e0f-9aaa-b1dc666d6846",
-      "name": "Limit"
-    },
-    {
-      "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
@@ -176,7 +164,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\n\nif (items.length === 0) {\n  return [{ json: { message: 'No items above threshold this week.' } }];\n}\n$input.first().json.output.score\nconst now = new Date().toISOString().split('T')[0];\nconst lines = [`*Tech digest — ${now}*`, ''];\n\nfor (const item of items) {\n  const {title, link, output } = item.json\n  const {score, reasoning, tags} = output\n  const tagStr = (tags || []).slice(0, 3).map(t => `\\`${t}\\``).join(' ');\n\n  lines.push(`*${score}/10* — [${title}](${link})`);\n  lines.push(`_${reasoning}_`);\n  if (tagStr) lines.push(tagStr);\n  lines.push('');\n}\n\nreturn [{ json: { digest: lines.join('\\n') } }];"
+        "jsCode": "const items = $input.all();\n\nif (items.length === 0) {\n  return [{ json: { digest: 'No items above threshold this week.' } }];\n}\n\nconst top = items\n  .map(i => i.json)\n  .sort((a, b) => b.score - a.score)\n  .slice(0, 5);\n\nconst now = new Date().toISOString().split('T')[0];\nconst lines = [`*Tech digest — ${now}*`, ''];\n\nfor (const { title, link, output } of top) {\n  const { score, reasoning, tags} = output\n  const shortReasoning = (reasoning || '').split(/(?<=[.!?])\\s+/)[0];\n  const tagStr = (tags || []).slice(0, 3).map(t => `\\`${t}\\``).join(' ');\n\n  lines.push(`*${score}/10* — [${title}](${link})`);\n  lines.push(`_${shortReasoning}_`);\n  if (tagStr) lines.push(tagStr);\n  lines.push('');\n}\n\nreturn [{ json: { digest: lines.join('\\n') } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -189,7 +177,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const llmItems = $input.all();\nconst sourceItems = $('Limit').all();\n\nreturn llmItems.map((item, i) => {\n  const source = sourceItems[i]?.json ?? {};\n  return {\n    json: {\n      ...source,           // title, link, contentSnippet, etc\n      ...item.json,        // score, reasoning, tags\n    }\n  };\n});"
+        "jsCode": "const llmItems = $input.all();\nconst sourceItems = $('Merge').all();\n\nreturn llmItems.map((item, i) => {\n  const source = sourceItems[i]?.json ?? {};\n  return {\n    json: {\n      ...source,           // title, link, contentSnippet, etc\n      ...item.json,        // score, reasoning, tags\n    }\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -199,6 +187,28 @@
       ],
       "id": "0a9cda25-4184-4afe-b7a0-e6bbd5294544",
       "name": "Merge with source"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.digest }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1424,
+        -272
+      ],
+      "id": "fda38ccf-d2d5-4320-a898-25a19db046ab",
+      "name": "Send a text message",
+      "webhookId": "8a392622-1cc7-4b60-803e-ba0fd050f40d",
+      "credentials": {
+        "telegramApi": {
+          "id": "K0tk1qYoA4hnr81J",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -213,6 +223,11 @@
           },
           {
             "node": "simonwillison.net",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "hnrss.org",
             "type": "main",
             "index": 0
           }
@@ -278,17 +293,6 @@
       "main": [
         [
           {
-            "node": "Limit",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Limit": {
-      "main": [
-        [
-          {
             "node": "Basic LLM Chain",
             "type": "main",
             "index": 0
@@ -328,6 +332,17 @@
           }
         ]
       ]
+    },
+    "Markdown convert": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -335,7 +350,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "44f2dcab-3eb4-49be-a80c-4f19e2cf921f",
+  "versionId": "6bc2bd70-5f3d-40f1-b2fe-7e67672b3daa",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "63425becdb25e3fe67dabe1ae2db9b357e60b71a33fbdb4cd81f8839a882d05c"
