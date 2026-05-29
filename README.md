@@ -15,6 +15,13 @@ All personal data (profile, feeds, interests) lives in SilverBullet — not here
 | `curator-pro` | Professional content curation (tech, architecture, leadership) | Monday 07:30 |
 | `curator-personal` | Personal/hobby content curation | Friday 16:00 |
 
+## Implementations
+
+This repo contains two implementations of the same idea, side by side:
+
+- **Code-first** (`agents/`, `scripts/`) — the original Python and Shell pipeline, runs both curators on the schedules above, publishes to SilverBullet.
+- **Workflow-first** (`n8n/`) — an n8n workflow that does the tech-newsletter slice and delivers a top-5 digest to Telegram instead of a wiki page. Built as a hands-on evaluation of where visual workflow tools belong in an AI-native dev stack. See [`n8n/README.md`](n8n/README.md) for setup and the comparison.
+
 ## Setup
 
 1. Clone or fork this repo
