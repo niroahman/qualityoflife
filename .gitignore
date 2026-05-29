@@ -13,3 +13,6 @@ venv/
 /tmp/runtime-prompt.md
 /tmp/feeds_raw*.md
 /tmp/digest.json
+
+# macOS
+.DS_Store
