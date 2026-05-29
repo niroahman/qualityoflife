@@ -6,8 +6,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -736,
-        -240
+        -816,
+        -544
       ],
       "id": "a2ccdf01-45ae-4a75-9c34-e2b00d137058",
       "name": "When clicking ‘Execute workflow’"
@@ -20,8 +20,8 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -240,
-        -96
+        -512,
+        -272
       ],
       "id": "70cfc5da-ff12-4279-a1cf-9cd5fb8da4a2",
       "name": "simonwillison.net"
@@ -34,8 +34,8 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -240,
-        -256
+        -512,
+        -432
       ],
       "id": "8f8aaa5b-a191-4a3d-ab82-520fd8d96353",
       "name": "dev.to"
@@ -48,12 +48,11 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        -240,
-        -432
+        -512,
+        -608
       ],
       "id": "455821c7-5acf-473c-bb1d-a32cff9217fc",
-      "name": "hnrss.org",
-      "disabled": true
+      "name": "hnrss.org"
     },
     {
       "parameters": {
@@ -62,8 +61,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        96,
-        -288
+        -272,
+        -320
       ],
       "id": "a7275b54-9fa3-477a-8c19-c36912fcfa88",
       "name": "Merge"
@@ -85,8 +84,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        480,
-        -272
+        -768,
+        48
       ],
       "id": "82c1c81b-82a2-4890-82c9-180b99c63773",
       "name": "Basic LLM Chain"
@@ -103,8 +102,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        480,
-        -48
+        -768,
+        272
       ],
       "id": "92c4ade7-eede-426f-82ed-ed430ce12eac",
       "name": "OpenRouter Chat Model",
@@ -123,8 +122,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        800,
-        -112
+        -624,
+        272
       ],
       "id": "5cdd56ff-84b7-4f56-9b9f-0aff29d6a021",
       "name": "Structured Output Parser"
@@ -156,24 +155,11 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        944,
-        -272
+        -448,
+        128
       ],
       "id": "63c10dac-596b-4116-9aa2-658015a30a33",
       "name": "Filter"
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\n\nif (items.length === 0) {\n  return [{ json: { digest: 'No items above threshold this week.' } }];\n}\n\nconst top = items\n  .map(i => i.json)\n  .sort((a, b) => b.score - a.score)\n  .slice(0, 5);\n\nconst now = new Date().toISOString().split('T')[0];\nconst lines = [`*Tech digest — ${now}*`, ''];\n\nfor (const { title, link, output } of top) {\n  const { score, reasoning, tags} = output\n  const shortReasoning = (reasoning || '').split(/(?<=[.!?])\\s+/)[0];\n  const tagStr = (tags || []).slice(0, 3).map(t => `\\`${t}\\``).join(' ');\n\n  lines.push(`*${score}/10* — [${title}](${link})`);\n  lines.push(`_${shortReasoning}_`);\n  if (tagStr) lines.push(tagStr);\n  lines.push('');\n}\n\nreturn [{ json: { digest: lines.join('\\n') } }];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1200,
-        -272
-      ],
-      "id": "61199275-0bf9-4e30-8abe-d5343e18dd2f",
-      "name": "Markdown convert"
     },
     {
       "parameters": {
@@ -182,8 +168,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        768,
-        -432
+        -480,
+        -96
       ],
       "id": "0a9cda25-4184-4afe-b7a0-e6bbd5294544",
       "name": "Merge with source"
@@ -197,8 +183,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1424,
-        -272
+        -224,
+        224
       ],
       "id": "fda38ccf-d2d5-4320-a898-25a19db046ab",
       "name": "Send a text message",
@@ -209,6 +195,42 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -816,
+        -352
+      ],
+      "id": "5975d1e9-f8d1-4993-b96b-bd690077ffa6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nif (items.length === 0) {\n  return [{ json: { digest: 'No items above threshold this week.' } }];\n}\n\nconst top = items\n  .map(i => i.json)\n  .sort((a, b) => b.score - a.score)\n  .slice(0, 5);\n\nconst now = new Date().toISOString().split('T')[0];\nconst lines = [`*Tech digest — ${now}*`, ''];\n\nfor (const { title, link, output } of top) {\n  const { score, reasoning, tags} = output\n  const shortReasoning = (reasoning || '').split(/(?<=[.!?])\\s+/)[0];\n  const tagStr = (tags || []).slice(0, 3).map(t => `\\`${t}\\``).join(' ');\n\n  lines.push(`*${score}/10* — [${title}](${link})`);\n  lines.push(`_${shortReasoning}_`);\n  if (tagStr) lines.push(tagStr);\n  lines.push('');\n}\n\nreturn [{ json: { digest: lines.join('\\n') } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -32
+      ],
+      "id": "61199275-0bf9-4e30-8abe-d5343e18dd2f",
+      "name": "Markdown convert and pick top 5"
     }
   ],
   "pinData": {},
@@ -315,7 +337,7 @@
       "main": [
         [
           {
-            "node": "Markdown convert",
+            "node": "Markdown convert and pick top 5",
             "type": "main",
             "index": 0
           }
@@ -333,7 +355,28 @@
         ]
       ]
     },
-    "Markdown convert": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "hnrss.org",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "dev.to",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "simonwillison.net",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown convert and pick top 5": {
       "main": [
         [
           {
@@ -345,12 +388,12 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "6bc2bd70-5f3d-40f1-b2fe-7e67672b3daa",
+  "versionId": "aedfb799-319e-44df-8882-63ebb5b24d19",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "63425becdb25e3fe67dabe1ae2db9b357e60b71a33fbdb4cd81f8839a882d05c"
