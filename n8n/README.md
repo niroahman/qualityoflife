@@ -121,5 +121,5 @@ A few choices worth flagging if you import this and want to extend it:
 
 Two writeups (publishing within a few days):
 
-- **Building a tech digest pipeline with n8n.** The construction story, the setup, the 4096-character constraint, the agent-to-agent twist.
+- [**Building a tech digest pipeline with n8n.**](https://niro.codes/blog/2026-05-30-n8n-tech-digest-pipeline) The construction story, the setup, the 4096-character constraint, the agent-to-agent twist.
 - **Three ways to curate your tech digests.** What each approach does to your thinking, a cost comparison across models, and an unexpected third path.
